@@ -16,11 +16,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter App',
+      title: 'Personal Expenses',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
+        accentColor: Colors.amber,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Personal Expenses'),
     );
   }
 }
@@ -45,7 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final List<Transaction> transactions = [
+  final List<Transaction> _userTransactions = [
     Transaction(
         id: 't1',
         title: 'New Shoes',
@@ -59,6 +60,32 @@ class _MyHomePageState extends State<MyHomePage> {
         date: DateTime.now()
     ),
   ];
+  void _addNewTransaction(String txTitle, double txAmount){
+    final newTx = Transaction(
+      id:DateTime.now().toString(),
+      title: txTitle,
+      amount: txAmount,
+      date:DateTime.now(),
+    );
+
+    setState(() {
+      _userTransactions.add(newTx);
+    });
+  }
+
+  void _startProcessAddNewTransaction(BuildContext context){
+    showModalBottomSheet(
+        context: context,
+        builder: (_){
+          return GestureDetector(
+            onTap: (){},
+            child: NewTransaction(_addNewTransaction),
+            behavior: HitTestBehavior.opaque,
+          );
+
+        },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +93,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: <Widget>[
+          IconButton(
+            onPressed: (){
+              _startProcessAddNewTransaction(context);
+            },
+            icon: Icon(Icons.add),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -80,15 +115,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 elevation: 5,
               ),
             ),
-            UserTransaction(),
+            // UserTransaction(),
+            TransactionList(_userTransactions),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.yellow,
+        onPressed: (){
+          _startProcessAddNewTransaction(context);
+        },
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

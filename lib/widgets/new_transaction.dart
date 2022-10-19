@@ -2,36 +2,42 @@ import '../models/transection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class NewTransaction extends StatelessWidget {
+class NewTransaction extends StatefulWidget {
+
+  final Function addTx;
+  NewTransaction(this.addTx);
+
+  @override
+  _NewTransactionState createState() => _NewTransactionState();
+}
+
+class _NewTransactionState extends State<NewTransaction> {
   late String titleInput;
   late String amountInput;
 
-  final Function addTx;
   final titleControle = TextEditingController();
   final amountControle = TextEditingController();
 
-  NewTransaction(this.addTx);
-
-  void submitData(){
-
+  void submitData() {
     final enteredTitle = titleControle.text;
     final enteredAmount = double.parse(amountControle.text);
 
-    if(enteredTitle.isEmpty || enteredAmount <=0) {
+    if (enteredTitle.isEmpty || enteredAmount <= 0) {
       return;
     }
 
-    addTx(
+    widget.addTx(
         titleControle.text,
-        double.parse(amountControle.text)
+        double.parse(amountControle.text),
     );
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
-      child:Container(
+      child: Container(
         padding: EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -60,7 +66,7 @@ class NewTransaction extends StatelessWidget {
               // },
             ),
             FlatButton(
-                onPressed: (){
+                onPressed: () {
                   // print(titleControle.text);
                   // print(amountInput);
 
@@ -70,7 +76,6 @@ class NewTransaction extends StatelessWidget {
 
                   // titleControle.clear();
                   // amountControle.clear();
-
                 },
                 textColor: Colors.purple,
                 child: Text('Add Transaction'))
