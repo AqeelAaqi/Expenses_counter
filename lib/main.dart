@@ -18,8 +18,26 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        accentColor: Colors.amber,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.red).copyWith(secondary: Colors.amber),
+          fontFamily: 'QuickSand',
+          textTheme: ThemeData.light().textTheme.copyWith(
+              caption: TextStyle(
+                fontFamily: 'OpenSans',
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight:FontWeight.bold,
+              )
+          ),
+          appBarTheme: AppBarTheme(
+              textTheme: ThemeData.light().textTheme.copyWith(
+                          subtitle1: TextStyle(
+                          fontFamily: 'OpenSans',
+                          fontSize: 20,
+                          fontWeight:FontWeight.bold,
+                      )
+              )
+          ),
       ),
       home: const MyHomePage(title: 'Personal Expenses'),
     );
@@ -92,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(fontFamily: 'OpenSans'),),
         actions: <Widget>[
           IconButton(
             onPressed: (){
@@ -122,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.yellow,
+        // backgroundColor: Colors.yellow,
         onPressed: (){
           _startProcessAddNewTransaction(context);
         },
