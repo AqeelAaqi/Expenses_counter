@@ -1,4 +1,4 @@
-import 'package:expenses_counter/models/transection.dart';
+import 'package:expenses_counter/models/transaction.dart';
 import 'package:expenses_counter/widgets/chart_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +27,7 @@ class Chart extends StatelessWidget {
       print(DateFormat.E().format(weekDay));
       print(totalSum);
       return {'day': DateFormat.E().format(weekDay).substring(0, 1), 'amount': totalSum};
-    });
+    }).reversed.toList();
   }
 
   double get totalSpending {

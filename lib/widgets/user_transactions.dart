@@ -1,5 +1,5 @@
 import '../widgets/transaction_list.dart';
-import '../models/transection.dart';
+import '../models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

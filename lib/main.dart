@@ -1,10 +1,8 @@
 import 'package:expenses_counter/widgets/chart.dart';
 import 'package:expenses_counter/widgets/new_transaction.dart';
 import 'package:expenses_counter/widgets/transaction_list.dart';
-import 'package:expenses_counter/widgets/user_transactions.dart';
 import 'package:flutter/material.dart';
-import 'models/transection.dart';
-import 'package:intl/intl.dart';
+import 'models/transaction.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,24 +18,35 @@ class MyApp extends StatelessWidget {
       title: 'Personal Expenses',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.red).copyWith(secondary: Colors.amber),
+          // primarySwatch: Colors.red).copyWith(secondary: Colors.amber),
+          primarySwatch: Colors.red),
+          accentColor: Colors.amber,
+          errorColor: Colors.redAccent,
           fontFamily: 'QuickSand',
           textTheme: ThemeData.light().textTheme.copyWith(
-              caption: TextStyle(
+              caption: const TextStyle(
                 fontFamily: 'QuickSand',
                 fontSize: 18,
                 color: Colors.black,
                 fontWeight:FontWeight.bold,
-              )
+              ),
+            button: const TextStyle(color: Colors.white),
           ),
           appBarTheme: AppBarTheme(
-              textTheme: ThemeData.light().textTheme.copyWith(
-                          subtitle1: TextStyle(
+              toolbarTextStyle: ThemeData.light().textTheme.copyWith(
+                          subtitle1: const TextStyle(
+                          fontFamily: 'OpenSans',
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight:FontWeight.bold,
+                      ),
+              ).bodyText2, titleTextStyle: ThemeData.light().textTheme.copyWith(
+                          subtitle1: const TextStyle(
                           fontFamily: 'OpenSans',
                           fontSize: 20,
                           fontWeight:FontWeight.bold,
-                      )
-              )
+                      ),
+              ).headline6
           ),
       ),
       home: const MyHomePage(title: 'Personal Expenses'),
@@ -65,26 +74,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final List<Transaction> _userTransactions = [
-  //   Transaction(
-  //       id: 't1',
-  //       title: 'New Shoes',
-  //       amount: 69.99,
-  //       date: DateTime.now()
-  //   ),
-  //   Transaction(
-  //       id: 't2',
-  //       title: 'Weekly Groceries',
-  //       amount: 16.43,
-  //       date: DateTime.now()
-  //   ),
-  ];
-  void _addNewTransaction(String txTitle, double txAmount){
+  final List<Transaction> _userTransactions = [];
+  void _addNewTransaction(String txTitle, double txAmount, DateTime chosenDate){
     final newTx = Transaction(
       id:DateTime.now().toString(),
       title: txTitle,
       amount: txAmount,
-      date:DateTime.now(),
+      date:chosenDate,
+      // date:DateTime.now(),
     );
 
     setState(() {
@@ -92,9 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _deletTransection(String id){
+    setState(() {
+      _userTransactions.removeWhere((tx) => tx.id == id);
+    });
+  }
+
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
-      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),
+      return tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7),
       ),);
     }).toList();
   }
@@ -118,13 +121,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title, style: TextStyle(fontFamily: 'OpenSans'),),
+        title: Text(widget.title, style: const TextStyle(fontFamily: 'OpenSans'),),
         actions: <Widget>[
           IconButton(
             onPressed: (){
               _startProcessAddNewTransaction(context);
             },
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           ),
         ],
       ),
@@ -138,7 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
               _recentTransactions
             ),
             // UserTransaction(),
-            TransactionList(_userTransactions),
+
+            TransactionList(_userTransactions, _deletTransection ),
           ],
         ),
       ),
