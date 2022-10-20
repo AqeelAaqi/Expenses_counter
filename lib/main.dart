@@ -1,3 +1,4 @@
+import 'package:expenses_counter/widgets/chart.dart';
 import 'package:expenses_counter/widgets/new_transaction.dart';
 import 'package:expenses_counter/widgets/transaction_list.dart';
 import 'package:expenses_counter/widgets/user_transactions.dart';
@@ -91,6 +92,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Transaction> get _recentTransactions {
+    return _userTransactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),
+      ),);
+    }).toList();
+  }
+
   void _startProcessAddNewTransaction(BuildContext context){
     showModalBottomSheet(
         context: context,
@@ -125,13 +133,9 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start, // top to bottom
           // crossAxisAlignment: CrossAxisAlignment.start, //left to right
           children: <Widget>[
-            const SizedBox(
-              width: double.infinity,
-              child: Card(
-                color: Colors.blue,
-                child: Text('CHART!'),
-                elevation: 5,
-              ),
+            Text('CHART!', style: Theme.of(context).textTheme.caption,),
+            Chart(
+              _recentTransactions
             ),
             // UserTransaction(),
             TransactionList(_userTransactions),
