@@ -2,9 +2,15 @@ import 'package:expenses_counter/widgets/chart.dart';
 import 'package:expenses_counter/widgets/new_transaction.dart';
 import 'package:expenses_counter/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'models/transaction.dart';
 
 void main() {
+  SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
   runApp(const MyApp());
 }
 
@@ -17,36 +23,41 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.red),
-          accentColor: Colors.amber,
-          errorColor: Colors.redAccent,
-          fontFamily: 'QuickSand',
-          textTheme: ThemeData.light().textTheme.copyWith(
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.red),
+        accentColor: Colors.amber,
+        errorColor: Colors.redAccent,
+        fontFamily: 'QuickSand',
+        textTheme: ThemeData.light().textTheme.copyWith(
               caption: const TextStyle(
                 fontFamily: 'QuickSand',
                 fontSize: 18,
                 color: Colors.black,
-                fontWeight:FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
-            button: const TextStyle(color: Colors.white),
-          ),
-          appBarTheme: AppBarTheme(
-              toolbarTextStyle: ThemeData.light().textTheme.copyWith(
-                          subtitle1: const TextStyle(
-                          fontFamily: 'OpenSans',
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight:FontWeight.bold,
-                      ),
-              ).bodyText2, titleTextStyle: ThemeData.light().textTheme.copyWith(
-                          subtitle1: const TextStyle(
-                          fontFamily: 'OpenSans',
-                          fontSize: 20,
-                          fontWeight:FontWeight.bold,
-                      ),
-              ).headline6
-          ),
+              button: const TextStyle(color: Colors.white),
+            ),
+        appBarTheme: AppBarTheme(
+            toolbarTextStyle: ThemeData.light()
+                .textTheme
+                .copyWith(
+                  subtitle1: const TextStyle(
+                    fontFamily: 'OpenSans',
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+                .bodyText2,
+            titleTextStyle: ThemeData.light()
+                .textTheme
+                .copyWith(
+                  subtitle1: const TextStyle(
+                    fontFamily: 'OpenSans',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+                .headline6),
       ),
       home: const MyHomePage(title: 'Personal Expenses'),
     );
@@ -62,14 +73,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   final List<Transaction> _userTransactions = [];
-  void _addNewTransaction(String txTitle, double txAmount, DateTime chosenDate){
+  bool _showChart = false;
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Transaction(
-      id:DateTime.now().toString(),
+      id: DateTime.now().toString(),
       title: txTitle,
       amount: txAmount,
-      date:chosenDate,
+      date: chosenDate,
       // date:DateTime.now(),
     );
 
@@ -78,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _deletTransection(String id){
+  void _deletTransection(String id) {
     setState(() {
       _userTransactions.removeWhere((tx) => tx.id == id);
     });
@@ -86,59 +98,94 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
-      return tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7),
-      ),);
+      return tx.date.isAfter(
+        DateTime.now().subtract(
+          const Duration(days: 7),
+        ),
+      );
     }).toList();
   }
 
-  void _startProcessAddNewTransaction(BuildContext context){
+  void _startProcessAddNewTransaction(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (_){
-          return GestureDetector(
-            onTap: (){},
-            child: NewTransaction(_addNewTransaction),
-            behavior: HitTestBehavior.opaque,
-          );
-
-        },
+      context: context,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () {},
+          child: NewTransaction(_addNewTransaction),
+          behavior: HitTestBehavior.opaque,
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title, style: const TextStyle(fontFamily: 'OpenSans'),),
-        actions: <Widget>[
-          IconButton(
-            onPressed: (){
-              _startProcessAddNewTransaction(context);
-            },
-            icon: const Icon(Icons.add),
-          ),
-        ],
+    final isLandScape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: Text(
+        widget.title,
+        style: const TextStyle(fontFamily: 'OpenSans'),
       ),
+      actions: <Widget>[
+        IconButton(
+          onPressed: () {
+            _startProcessAddNewTransaction(context);
+          },
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
+    final listWidget = Container(
+        height: (MediaQuery.of(context).size.height -
+            appBar.preferredSize.height -
+            MediaQuery.of(context).padding.top) *
+            0.7,
+        child: TransactionList(_userTransactions, _deletTransection));
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start, // top to bottom
+          crossAxisAlignment: CrossAxisAlignment.stretch, // top to bottom
           // crossAxisAlignment: CrossAxisAlignment.start, //left to right
           children: <Widget>[
-            Text('CHART!', style: Theme.of(context).textTheme.caption,),
-            Chart(
-              _recentTransactions
+            if(isLandScape) Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Show CHART!',
+                  // style: Theme.of(context).textTheme.caption,
+                ),
+                Switch(value: _showChart, onChanged: (val){
+                  setState(() {
+                    _showChart = val;
+                  });
+                },),
+              ],
             ),
-            // UserTransaction(),
-
-            TransactionList(_userTransactions, _deletTransection ),
+            if(!isLandScape) Container(
+                height: (MediaQuery.of(context).size.height -
+                    appBar.preferredSize.height -
+                    MediaQuery.of(context).padding.top) *
+                    0.3,
+                // 0.3,
+                child: Chart(_recentTransactions)),
+            if(!isLandScape) listWidget,
+            if(isLandScape)_showChart ? Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.7,
+                    // 0.3,
+                child: Chart(_recentTransactions))
+            :listWidget,
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         // backgroundColor: Colors.yellow,
-        onPressed: (){
+        onPressed: () {
           _startProcessAddNewTransaction(context);
         },
         tooltip: 'Increment',

@@ -11,9 +11,11 @@ class TransactionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 500,
+      // height: MediaQuery.of(context).size.height * 0.6,
+      // height: 500,
       child: transactions.isEmpty
-          ? Column(
+          ? LayoutBuilder(builder: (context, constraints){
+            return Column(
               children: <Widget>[
                 Text(
                   'No Transaction Added yet!',
@@ -23,13 +25,14 @@ class TransactionList extends StatelessWidget {
                   height: 20,
                 ),
                 SizedBox(
-                    height: 200,
+                    height: constraints.maxHeight * 0.6,
                     child: Image.asset(
                       'assets/images/waiting.png',
                       fit: BoxFit.cover,
                     )),
               ],
-            )
+            );
+      })
           : ListView.builder(
               itemBuilder: (context, index) {
                 return Card(
@@ -53,7 +56,15 @@ class TransactionList extends StatelessWidget {
                       DateFormat.yMMMd().format(transactions[index].date),
                       style: TextStyle(color: Colors.grey),
                     ),
-                    trailing: IconButton(
+                    trailing: MediaQuery.of(context).size.width > 360
+                      ? FlatButton.icon(
+                        onPressed: () {
+                        deleteTx(transactions[index].id);
+                      },
+                        textColor: Theme.of(context).errorColor,
+                        icon: Icon(Icons.delete),
+                        label: Text('Delete'))
+                        :IconButton(
                       icon: Icon(Icons.delete),
                       color: Theme.of(context).errorColor,
                       onPressed: () {
