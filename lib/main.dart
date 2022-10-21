@@ -1,16 +1,17 @@
-import 'package:expenses_counter/widgets/chart.dart';
-import 'package:expenses_counter/widgets/new_transaction.dart';
-import 'package:expenses_counter/widgets/transaction_list.dart';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'models/transaction.dart';
+import '../widgets/chart.dart';
+import '../widgets/new_transaction.dart';
+import '../widgets/transaction_list.dart';
 
 void main() {
-  SystemChrome.setPreferredOrientations(
-      [
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const MyApp());
 }
 
@@ -121,76 +122,109 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandScape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final appBar = AppBar(
-      title: Text(
-        widget.title,
-        style: const TextStyle(fontFamily: 'OpenSans'),
-      ),
-      actions: <Widget>[
-        IconButton(
-          onPressed: () {
-            _startProcessAddNewTransaction(context);
-          },
-          icon: const Icon(Icons.add),
-        ),
-      ],
-    );
+    final mediaQuery = MediaQuery.of(context);
+    final isLandScape = mediaQuery.orientation == Orientation.landscape;
+    final dynamic appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text(widget.title),
+            trailing: Row(
+              children: <Widget>[
+                GestureDetector(
+                  child: Icon(CupertinoIcons.add),
+                  onTap: () => _startProcessAddNewTransaction(context),
+                ),
+              ],
+              mainAxisSize: MainAxisSize.min,
+            ),
+          )
+        : AppBar(
+            title: Text(
+              widget.title,
+              style: const TextStyle(fontFamily: 'OpenSans'),
+            ),
+            actions: <Widget>[
+              IconButton(
+                onPressed: () {
+                  _startProcessAddNewTransaction(context);
+                },
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          );
     final listWidget = Container(
-        height: (MediaQuery.of(context).size.height -
-            appBar.preferredSize.height -
-            MediaQuery.of(context).padding.top) *
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
             0.7,
         child: TransactionList(_userTransactions, _deletTransection));
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final pageBody = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch, // top to bottom
           // crossAxisAlignment: CrossAxisAlignment.start, //left to right
           children: <Widget>[
-            if(isLandScape) Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Show CHART!',
-                  // style: Theme.of(context).textTheme.caption,
-                ),
-                Switch(value: _showChart, onChanged: (val){
-                  setState(() {
-                    _showChart = val;
-                  });
-                },),
-              ],
-            ),
-            if(!isLandScape) Container(
-                height: (MediaQuery.of(context).size.height -
-                    appBar.preferredSize.height -
-                    MediaQuery.of(context).padding.top) *
-                    0.3,
-                // 0.3,
-                child: Chart(_recentTransactions)),
-            if(!isLandScape) listWidget,
-            if(isLandScape)_showChart ? Container(
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.7,
-                    // 0.3,
-                child: Chart(_recentTransactions))
-            :listWidget,
+            if (isLandScape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Show CHART!',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  Switch.adaptive(
+                    activeColor: Theme.of(context).accentColor,
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            if (!isLandScape)
+              Container(
+                  height: (mediaQuery.size.height -
+                          appBar.preferredSize.height -
+                          mediaQuery.padding.top) *
+                      0.3,
+                  // 0.3,
+                  child: Chart(_recentTransactions)),
+            if (!isLandScape) listWidget,
+            if (isLandScape)
+              _showChart
+                  ? Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7,
+                      // 0.3,
+                      child: Chart(_recentTransactions))
+                  : listWidget,
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        // backgroundColor: Colors.yellow,
-        onPressed: () {
-          _startProcessAddNewTransaction(context);
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: pageBody,
+            navigationBar: appBar,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: pageBody,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    // backgroundColor: Colors.yellow,
+                    onPressed: () {
+                      _startProcessAddNewTransaction(context);
+                    },
+                    tooltip: 'Increment',
+                    child: const Icon(Icons.add),
+                  ), // This trailing comma makes auto-formatting nicer for build methods.
+          );
   }
 }

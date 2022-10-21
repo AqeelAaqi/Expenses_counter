@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:expenses_counter/widgets/adaptive_flat_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
@@ -29,17 +34,19 @@ class _NewTransactionState extends State<NewTransaction> {
 
   void _presentDatePicker() {
     showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2022),
-            lastDate: DateTime.now())
-        .then((pickedDate) {
-      if (pickedDate != null) {
-        setState(() {
-          _selectedDate = pickedDate;
-        });
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2022),
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
       }
+      setState(() {
+        _selectedDate = pickedDate;
+      });
     });
+    print('...');
   }
 
   @override
@@ -67,7 +74,7 @@ class _NewTransactionState extends State<NewTransaction> {
               ),
               TextField(
                 decoration: const InputDecoration(
-                  labelText: 'Amount',
+                  labelText: 'Enter Amount',
                 ),
                 controller: _amountControler,
                 keyboardType: TextInputType.number,
@@ -79,10 +86,7 @@ class _NewTransactionState extends State<NewTransaction> {
                       child: Text(_selectedDate == null
                           ? 'No Date Chosen!'
                           : 'Picked Date: ${DateFormat.yMd().format(_selectedDate!)}')),
-                  FlatButton(
-                      onPressed: _presentDatePicker,
-                      textColor: Theme.of(context).primaryColor,
-                      child: Text('Choose Date'))
+                  AdaptiveFlatButton("Choose Date", _presentDatePicker)
                 ],
               ),
               RaisedButton(
